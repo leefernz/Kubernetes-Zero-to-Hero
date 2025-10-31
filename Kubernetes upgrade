@@ -8,6 +8,6 @@ Prerequisites :
 -
 
 Steps :
-Eks control plan upgrade - run upgrade using eksctl upgrade --name --version
+Eks control plan upgrade - run upgrade using eksctl upgrade cluster --name demo --version 1.31
 nodegroup/nodes/fargate upgrade - In ui there is an option to upgrade nodegroups using rolling update
 Addones upgrade
