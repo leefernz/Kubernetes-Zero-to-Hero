@@ -1,0 +1,10 @@
+rollout - kubernetes default deployment strategy. near zero downtime. 
+  ex - when we set replicaset as 4 and do a rollout with v2.. it will first try to replace the first pod with v2 and if everything is ok. it will replace other pods as well. In order to
+  work this ra=eadiness probe needs to be set.
+
+  Canary - Powerfull deployment strategy it lets you test it on prod env. there are 2 deployments with one as V1 deployment and other one as V2(cananry). when new version is released 
+  we set the percentage of traffic that should go to V2. To implement this there is a ingress annotataion with traffic weightage we set it to lets say 10 percent. then 10 per of traffic is 
+  sent to v2 and once the testing is finished more weightage is provided.
+
+  Bluegreen - Most Safest and costly deployment strategy. We will have 2 ENVs for this blue and green with load balancer placed on top. Blue env is the current version and green will the
+  new version that we want to deploy
