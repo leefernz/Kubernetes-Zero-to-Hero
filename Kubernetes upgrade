@@ -1,0 +1,13 @@
+Prerequisites :
+- Cordon nodes - goood practice to make nodes unscedulable any pods during upgrade
+- Release notes - 1.30 - 1.31 read the docs ex - api version for ingress used to be extension/beta1 that was changed
+- Start with lower Envs
+- Control plane and Nodes should be of same version before the actual upgrade. if the node is one/few version behind please upgrade the node first to match with control plane.
+- Also the cluster auto scaler version (if using ) should match with control plane
+- At least 5 available ip adresses should be available in a subnet
+-
+
+Steps :
+Eks control plan upgrade - run upgrade using eksctl upgrade --name --version
+nodegroup/nodes/fargate upgrade - In ui there is an option to upgrade nodegroups using rolling update
+Addones upgrade
