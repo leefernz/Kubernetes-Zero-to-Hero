@@ -1,0 +1,116 @@
+So, in Kubernetes, by default, the scheduler automatically decides which node a pod should run on, based on available CPU, memory, and other factors.
+
+But sometimes, we want control — like sending a pod to a specific type of node or avoiding certain nodes.
+That’s where these concepts — nodename, nodeSelector, node affinity, pod affinity, taints, and tolerations — come into play.
+
+Let me go one by one 👇
+
+🔹 1. nodeName
+
+This is the most direct way to place a pod on a specific node.
+You literally tell Kubernetes,
+
+“Run this pod only on this node.”
+
+Example:
+
+spec:
+  nodeName: worker-node-1
+
+
+Once you set this, the scheduler doesn’t even make a decision — the pod just goes straight to that node.
+It’s rarely used in production because it’s very static — if that node goes down, the pod can’t move elsewhere.
+
+🔹 2. nodeSelector
+
+A nodeSelector is a simple way to match pods with nodes based on labels.
+So instead of hardcoding the node name, you add a label to nodes like:
+
+kubectl label node worker-node-1 disktype=ssd
+
+
+Then in your pod spec:
+
+spec:
+  nodeSelector:
+    disktype: ssd
+
+
+Now Kubernetes will place the pod only on nodes that have the label disktype=ssd.
+
+It’s still simple and exact-match based, but better than using nodeName because it’s label-based.
+
+🔹 3. Node Affinity
+
+Node affinity is a more flexible and advanced version of nodeSelector.
+It lets you define soft and hard rules about where pods can or can’t run.
+
+requiredDuringSchedulingIgnoredDuringExecution: Hard rule — the pod must go on matching nodes.
+
+preferredDuringSchedulingIgnoredDuringExecution: Soft rule — the pod should go there if possible.
+
+Example:
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: disktype
+          operator: In
+          values:
+          - ssd
+
+
+So it’s basically nodeSelector + flexibility + operator support (In, NotIn, Exists).
+And we can even express preferences rather than strict rules.
+
+🔹 4. Pod Affinity
+
+Pod affinity is about scheduling pods close to other pods.
+For example, if two services communicate frequently, you might want them on the same node or in the same zone to reduce latency.
+
+Example:
+
+affinity:
+  podAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchLabels:
+          app: frontend
+      topologyKey: "kubernetes.io/hostname"
+
+
+This says — schedule my pod on the same node as the one running the frontend app.
+
+🔹 5. Taints
+
+Taints work in the opposite way — they repel pods from nodes.
+It’s like marking a node with a condition that says,
+
+“Don’t put any pod here unless it can tolerate this condition.”
+
+Example:
+
+kubectl taint nodes node1 key=value:NoSchedule
+
+
+This means no pod will be scheduled on node1 unless it has a matching toleration.
+It’s often used for dedicated or special-purpose nodes — like GPU nodes or infra nodes.
+
+🔹 6. Tolerations
+
+Tolerations are applied to pods, and they let those pods tolerate certain taints.
+If a node is tainted, only pods with matching tolerations can land on it.
+
+Example:
+
+tolerations:
+- key: "key"
+  operator: "Equal"
+  value: "value"
+  effect: "NoSchedule"
+
+
+So taints repel, and tolerations allow exceptions.
+Together, they’re used to control which workloads can or cannot run on certain nodes.
