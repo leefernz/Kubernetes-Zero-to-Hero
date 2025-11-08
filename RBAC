@@ -1,0 +1,56 @@
+🔹 1. Authentication
+
+This is basically how Kubernetes finds out who you are when you try to access the cluster.
+In EKS, this usually happens through AWS IAM.
+So, when I run a kubectl command, EKS checks my IAM identity to confirm I’m a valid user — that’s authentication.
+
+🔹 2. EKS OIDC
+
+Now, for pods or applications running inside the cluster, we can’t really use IAM users directly — that’s where OIDC comes in.
+OIDC (OpenID Connect) lets us link a Kubernetes service account to an IAM role.
+So a pod can get AWS access securely without storing any access keys.
+It’s like saying: “This service account inside Kubernetes is allowed to act as this IAM role in AWS.”
+
+🔹 3. Authorization (RBAC)
+
+Once you’re authenticated, Kubernetes now needs to know what you can do — that’s where RBAC (Role-Based Access Control) comes in.
+It defines what permissions you have — for example, whether you can view pods, create deployments, or delete config maps.
+
+🔹 4. Kubeconfig
+
+The kubeconfig file is basically your connection ticket to the cluster.
+It contains the cluster details, the user credentials, and which namespace you’re working in.
+It also stores multiple contexts — so if I’m managing dev, qa, and prod clusters, I can switch easily between them using:
+
+kubectl config use-context dev
+
+🔹 5. Certificate Authority
+
+The CA (Certificate Authority) ensures that the connection between your kubectl and the cluster is secure and trusted.
+It’s what allows the API server and your local machine to communicate safely using HTTPS.
+
+🔹 6. User & Group
+
+Users usually represent people — like you or me — or external systems that need access.
+Groups are just collections of users, like a “dev team” or “admin team.”
+Instead of assigning permissions to each user one by one, you can assign them to a group.
+
+🔹 7. Role & RoleBinding
+
+A Role defines what actions are allowed inside a single namespace.
+For example, a role could say — “This user can list and create pods in the dev namespace.”
+The RoleBinding then says who gets those permissions — for example, binding that role to a user or a service account.
+
+🔹 8. ClusterRole & ClusterRoleBinding
+
+Sometimes you want permissions that apply across the entire cluster, not just one namespace.
+That’s where ClusterRole and ClusterRoleBinding come in.
+For example, a ClusterRole might allow viewing pods in all namespaces.
+The ClusterRoleBinding then assigns that access to a user or group cluster-wide.
+
+🔹 9. Service Account
+
+Now, for workloads running inside Kubernetes — like pods — we use Service Accounts.
+They act like identities for pods.
+If a pod needs to call the Kubernetes API or access AWS services, it uses its service account.
+And in EKS, that service account can be connected to an IAM role via OIDC — so it’s secure, keyless access to AWS resources.
