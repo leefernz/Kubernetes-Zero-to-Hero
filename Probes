@@ -1,4 +1,6 @@
-In Kubernetes, probes are used to check the health and status of containers to ensure applications are running properly. There are three main types — Startup, Liveness, and Readiness probes — each serving a specific purpose:
+In Kubernetes, probes are used to check the health and status of containers to ensure applications are running properly.
+In yaml we define probes at the container level not at the pod level
+There are three main types — Startup, Liveness, and Readiness probes — each serving a specific purpose:
 
 🔹 1. Startup Probe
 
