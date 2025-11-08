@@ -1,0 +1,73 @@
+In Kubernetes, probes are used to check the health and status of containers to ensure applications are running properly. There are three main types — Startup, Liveness, and Readiness probes — each serving a specific purpose:
+
+🔹 1. Startup Probe
+
+Purpose: Used to check if the application inside the container has started successfully.
+
+When it’s used: For applications that take a long time to start (like those with heavy initialization).
+
+Behavior:
+
+Until the startup probe succeeds, Kubernetes will not run liveness or readiness probes.
+
+Prevents the container from being killed prematurely by the liveness probe.
+
+Example:
+
+startupProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  failureThreshold: 30
+  periodSeconds: 10
+
+
+→ This gives the container up to 5 minutes (30×10s) to start before being considered failed.
+
+🔹 2. Liveness Probe
+
+Purpose: Checks if the container is still running and healthy.
+
+When it’s used: During the container’s lifecycle, after it has started.
+
+Behavior:
+
+If the probe fails, Kubernetes restarts the container.
+
+Ensures self-healing of pods.
+
+Example:
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 15
+  periodSeconds: 20
+
+
+→ Checks every 20s if the app is still alive. If it fails, the pod is restarted.
+
+🔹 3. Readiness Probe
+
+Purpose: Checks if the application is ready to serve traffic.
+
+When it’s used: After the container starts — determines if it should receive requests.
+
+Behavior:
+
+If the probe fails, Kubernetes removes the pod from the Service endpoints (stops sending traffic).
+
+Unlike liveness, it doesn’t restart the container.
+
+Example:
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+
+→ Ensures traffic only goes to healthy pods.
