@@ -1,0 +1,83 @@
+when we deploy applications in Kubernetes, they’re all running inside containers — and containers are ephemeral, meaning if a pod restarts, any data inside it is lost.
+To handle data persistence and configuration, we use a few key Kubernetes concepts: PV, PVC, StorageClass, ConfigMap, Secret, Volumes, and VolumeMounts.
+
+Let me go step by step 👇
+
+🔹 1. PV — Persistent Volume
+
+A Persistent Volume is basically a piece of storage in the cluster that’s been provisioned — it could come from EBS (in AWS), NFS, Azure Disk, or any other backend.
+Think of it as actual storage space that Kubernetes manages — kind of like a “storage drive” available to pods.
+
+You can create it manually or let Kubernetes create it dynamically.
+
+🔹 2. PVC — Persistent Volume Claim
+
+A Persistent Volume Claim is how the pod requests storage.
+It’s like saying:
+
+“Hey cluster, I need 5GB of storage with these access rules.”
+
+The PVC will look for a PV that matches its request — once matched, it gets bound, and the pod can use it.
+So PV is the actual storage, and PVC is the request for storage.
+
+🔹 3. StorageClass (SC)
+
+The StorageClass defines how the storage should be created — like the type of disk or performance level.
+For example:
+
+gp2 or gp3 in AWS for general-purpose SSDs,
+
+or standard for slower disks.
+
+So when a PVC doesn’t have a PV available, the StorageClass automatically provisions one for it — that’s called dynamic provisioning.
+
+In short:
+
+StorageClass = “Template for creating PVs automatically.”
+
+🔹 4. ConfigMap
+
+Now, for application configurations — like environment variables, URLs, or file paths — we don’t want to hardcode them inside containers.
+Instead, we store them in a ConfigMap.
+
+ConfigMaps hold non-sensitive configuration data in key-value pairs, and we can inject them into pods as environment variables or as files.
+
+Example:
+
+envFrom:
+  - configMapRef:
+      name: app-config
+
+
+So if you change the config in the ConfigMap, the pod can reload it without rebuilding the image.
+
+🔹 5. Secret
+
+A Secret is just like a ConfigMap but meant for sensitive data — like passwords, API tokens, or certificates.
+Kubernetes stores them base64 encoded and can mount them into pods the same way — either as files or as environment variables.
+
+So basically:
+
+ConfigMap → normal config
+Secret → sensitive config
+
+🔹 6. Volume
+
+A Volume in Kubernetes is a way to attach storage to a pod.
+It could come from many sources — a PV, ConfigMap, Secret, or even an emptyDir (temporary).
+Volumes give pods a directory to read/write data from.
+
+Example: You can mount a ConfigMap as a volume, and the app will see it as a configuration file.
+
+🔹 7. VolumeMounts
+
+Once you define a volume in a pod, you use volumeMounts to decide where inside the container that volume should appear.
+
+Example:
+
+volumeMounts:
+  - name: config-volume
+    mountPath: /app/config
+
+
+This means whatever is in that volume (say from a ConfigMap) will appear at /app/config inside the container.
