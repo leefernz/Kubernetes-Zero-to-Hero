@@ -1,0 +1,73 @@
+So in Kubernetes, every pod or container running in the cluster uses CPU and memory, and to make sure one pod doesn’t hog all the resources, Kubernetes gives us controls like requests, limits, QoS classes, LimitRange, and ResourceQuota.
+
+Let me explain step-by-step 👇
+
+🔹 1. Requests
+
+A request is basically the minimum amount of CPU or memory that your container needs to run properly.
+
+When you set a request, Kubernetes uses that value to schedule the pod on a node that has enough available resources.
+
+For example — if a container requests 200m CPU and 512Mi memory, Kubernetes ensures it’s placed on a node that can provide at least that much.
+
+So you can think of a request as:
+
+“I need at least this much to run smoothly.”
+
+🔹 2. Limits
+
+A limit is the maximum amount of CPU or memory your container can use.
+If it tries to go beyond that limit, Kubernetes will throttle the CPU or, in case of memory, kill the container.
+
+So, while requests decide scheduling, limits prevent your app from over-consuming and affecting others.
+
+Request = what I ask for
+Limit = what I’m allowed up to
+when memory exceeds it goes into OOM killed, when cpu exceeds it goes to burstable.
+
+🔹 3. QoS (Quality of Service) Classes
+
+Kubernetes assigns each pod a QoS class based on how you set requests and limits.
+It helps decide which pods get priority when the node is under pressure.
+
+There are three classes:
+
+QoS Class	Condition	Behavior
+Guaranteed	Requests = Limits for all containers	Highest priority — least likely to get killed
+Burstable	Requests < Limits	Medium priority — can burst beyond requests if resources available
+BestEffort	No requests or limits defined	Lowest priority — first to be killed during resource shortage
+
+So, in short: if your node is running out of memory, BestEffort pods go first, then Burstable, while Guaranteed ones are kept safe.
+
+🔹 4. LimitRange
+
+A LimitRange sets default or maximum/minimum resource values per pod or container inside a namespace.
+
+For example, if developers forget to specify requests and limits, the LimitRange can apply defaults.
+Or it can prevent someone from setting huge values accidentally, like requesting 10 CPUs in a small cluster.
+
+So it’s kind of like a rulebook for resource settings at the namespace level.
+
+Example:
+
+“In this namespace, every pod must request at least 100Mi memory and can’t exceed 1Gi.”
+
+🔹 5. ResourceQuota
+
+A ResourceQuota works at the namespace level and controls the total amount of resources that all pods together can use.
+
+It’s like a budget for the whole team or namespace.
+
+For example:
+
+ResourceQuota:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+
+
+This means that within this namespace, all pods combined can’t request more than 4 CPUs and 8Gi memory.
+
+So while LimitRange deals with individual pods, ResourceQuota deals with the total usage of the namespace.
